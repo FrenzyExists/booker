@@ -67,7 +67,7 @@ Room.create = async (newRoom, result) => {
  * function with the results of the query.
  */
 Room.getById = async (room, result) => {
-  await helper.helperModelGetterSimple("SELECT roomName, roomNumber, capacity FROM room WHERE id = ?", result, room);
+  await helper.helperModelGetterSimple("SELECT roomName, roomNumber, capacity FROM room WHERE id = ?", result, ['id'], room);
 }
 
 // Testing is done POYO
@@ -85,7 +85,7 @@ Room.getById = async (room, result) => {
  * function with the results of the query.
  */
 Room.getAll = async (limit, offset, result) => {
-  await helper.helperModelGetterSimple("SELECT id, roomName, roomNumber, capacity FROM room LIMIT ? OFFSET ?", result, limit, offset);
+  await helper.helperModelGetterSimple("SELECT id, roomName, roomNumber, capacity FROM room LIMIT ? OFFSET ?", result, ['limit', 'offset'], limit, offset);
 }
 
 
@@ -104,7 +104,7 @@ Room.getAll = async (limit, offset, result) => {
  */
 Room.getByName = async (room, result) => {
   const r = room.toLowerCase();
-  await helper.helperModelGetterSimple("SELECT id, roomNumber, capacity from room where roomName = ?", result, r);
+  await helper.helperModelGetterSimple("SELECT id, roomNumber, capacity from room where roomName = ?", result, ['roomName'], r);
 }
 
 // Testing Done POYO
@@ -126,7 +126,7 @@ Room.getByName = async (room, result) => {
  */
 Room.getByCategory = async (limit, offset, category, result) => {
   const c = category.toLowerCase();
-  await helper.helperModelGetterSimple("SELECT id, roomName, roomNumber, capacity from room where category = ?  LIMIT ? OFFSET ?", result, c, limit, offset);
+  await helper.helperModelGetterSimple("SELECT id, roomName, roomNumber, capacity from room where category = ?  LIMIT ? OFFSET ?", result, ['category', 'limit', 'offset'], c, limit, offset);
 }
 
 
