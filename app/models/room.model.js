@@ -1,5 +1,6 @@
 const sql = require("./db");
 const boom = require("@hapi/boom");
+const helper = require("./helper")
 
 /**
  * # Room
@@ -66,19 +67,7 @@ Room.create = async (newRoom, result) => {
  * function with the results of the query.
  */
 Room.getById = async (room, result) => {
-  try {
-    const query = sql.format("SELECT roomName, roomNumber, capacity FROM room WHERE id = ?", room);
-    const res = await sql.query(query);
-    console.log(res);
-    if (res.length) {
-      result(null, res[0]);
-    } else {
-      result({ kind: "not_found" }, null);
-    }
-  } catch (err) {
-    console.log("error: ", err);
-    result(boom.internal(err.message), null);
-  }
+  await helper.helperModelGetterSimple("SELECT roomName, roomNumber, capacity FROM room WHERE id = ?", result, room);
 }
 
 // Testing is done POYO
@@ -96,18 +85,7 @@ Room.getById = async (room, result) => {
  * function with the results of the query.
  */
 Room.getAll = async (limit, offset, result) => {
-  try {
-    const query = sql.format("SELECT id, roomName, roomNumber, capacity FROM room LIMIT ? OFFSET ?", [limit, offset]);
-    const res = await sql.query(query);
-    if (res.length) {
-      result(null, res[0])
-    } else {
-      result({ kind: "not_found" }, null);
-    }
-  } catch (err) {
-    console.log("error: ", boom.internal(err.message));
-    result(boom.internal(err.message), null);
-  }
+  await helper.helperModelGetterSimple("SELECT id, roomName, roomNumber, capacity FROM room LIMIT ? OFFSET ?", result, limit, offset);
 }
 
 
@@ -126,18 +104,7 @@ Room.getAll = async (limit, offset, result) => {
  */
 Room.getByName = async (room, result) => {
   const r = room.toLowerCase();
-  try {
-    const query = sql.format("SELECT id, roomNumber, capacity from room where roomName = ?", r);
-    const res = await sql.query(query);
-    if (res.length) {
-      result(null, res[0], ...r);
-    } else {
-      result({ kind: "not_found" }, null);
-    }
-  } catch (err) {
-    console.log("error: ", boom.internal(err.message));
-    result({ kind: "bad_input" }, null);
-  }
+  await helper.helperModelGetterSimple("SELECT id, roomNumber, capacity from room where roomName = ?", result, r);
 }
 
 // Testing Done POYO
@@ -159,18 +126,7 @@ Room.getByName = async (room, result) => {
  */
 Room.getByCategory = async (limit, offset, category, result) => {
   const c = category.toLowerCase();
-  try {
-    const query = sql.format("SELECT id, roomName, roomNumber, capacity from room where category = ?  LIMIT ? OFFSET ?", [c, limit, offset]);
-    const res = await sql.query(query);
-    if (res.length) {
-      result(null, res[0], ...c);
-    } else {
-      result({ kind: "not_found" }, null);
-    }
-  } catch (err) {
-    console.log("error: ", err);
-    result(boom.internal(err.message), null);
-  }
+  await helper.helperModelGetterSimple("SELECT id, roomName, roomNumber, capacity from room where category = ?  LIMIT ? OFFSET ?", result, c, limit, offset);
 }
 
 
