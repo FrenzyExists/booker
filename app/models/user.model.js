@@ -169,7 +169,6 @@ User.markUserTimeAvailable = (unId, result) => {
     const query = sql.format("DELETE from unavailableUserPeriod WHERE id = ?", unId)
 
 
-
   } catch (err) {
     console.log("error: ", err);
     result(boom.internal(err.message), null);

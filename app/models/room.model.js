@@ -40,13 +40,19 @@ Room.create = async (newRoom, result) => {
   }
 }
 
-// Requires Testing
+// Testing Done
+/**
+ * 
+ * @param {number} room 
+ * @param {*} result 
+ */
 Room.getById = async (room, result) => {
   try {
-    const query = sql.format("SELECT roomName, roomNumber, roomCapacity from room where id in ?", room);
+    const query = sql.format("SELECT roomName, roomNumber, capacity FROM room WHERE id = ?", room);
     const res = await sql.query(query);
+    console.log(res);
     if (res.length) {
-      result(null, res[0], ...room)
+      result(null, res[0]);
     } else {
       result({ kind: "not_found" }, null);
     }
@@ -56,13 +62,64 @@ Room.getById = async (room, result) => {
   }
 }
 
-// Requires Testing
-Room.getByName = async (room, result) => {
+/**
+ * Testing is done POYO
+ * @param {*} limit 
+ * @param {*} offset 
+ * @param {*} result 
+ */
+Room.getAll = async (limit, offset, result) => {
   try {
-    const query = sql.format("SELECT id, roomNumber, roomCapacity from room where roomName = ?", room);
+    const query = sql.format("SELECT id, roomName, roomNumber, capacity FROM room LIMIT ? OFFSET ?", [limit, offset]);
     const res = await sql.query(query);
     if (res.length) {
-      result(null, res[0], ...room)
+      result(null, res[0])
+    } else {
+      result({ kind: "not_found" }, null);
+    }
+  } catch (err) {
+    console.log("error: ", boom.internal(err.message));
+    result(boom.internal(err.message), null);
+  }
+}
+
+
+// Requires Testing
+/**
+ * 
+ * @param {string} room 
+ * @param {*} result 
+ */
+Room.getByName = async (room, result) => {
+  const r = room.toLowerCase();
+  try {
+    const query = sql.format("SELECT id, roomNumber, capacity from room where roomName = ?", r);
+    const res = await sql.query(query);
+    if (res.length) {
+      result(null, res[0], ...r);
+    } else {
+      result({ kind: "not_found" }, null);
+    }
+  } catch (err) {
+    console.log("error: ", boom.internal(err.message));
+    result({kind: "bad_input"}, null);
+  }
+}
+
+/**
+ * 
+ * @param {number} limit 
+ * @param {number} offset 
+ * @param {string} category 
+ * @param {*} result 
+ */
+Room.getByCategory = async (limit, offset, category, result) => {
+  const c = category.toLowerCase();
+  try {
+    const query = sql.format("SELECT id, roomName, roomNumber, capacity from room where category = ?  LIMIT ? OFFSET ?", [c, limit, offset]);
+    const res = await sql.query(query);
+    if (res.length) {
+      result(null, res[0], ...c);
     } else {
       result({ kind: "not_found" }, null);
     }
