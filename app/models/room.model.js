@@ -1,12 +1,14 @@
 const sql = require("./db");
-const boom = require("@hapi/boom")
+const boom = require("@hapi/boom");
 
 /**
+ * # Room
+ * 
  * @param {Object} room
  * @param {string} room.roomName
  * @param {string} room.roomNumber
  * @param {number} room.capacity
- * @param {*} room.category
+ * @param {number|string} room.category
  */
 const Room = function (room) {
   this.roomName = room.roomName;
@@ -16,18 +18,28 @@ const Room = function (room) {
 };
 
 
-// Requires Testing
+// Testing is done POYO
 /**
+ * # Room.create(newRoom, result)
  * 
- * @param {*} newRoom 
- * @param {*} result 
+ * @description Inserts a new Room entry in the database
+ * 
+ * ### Params
+ * @param {Object} newRoom An object containing the base room information to be sent. 
+ * @param {string} newRoom.name The name of the new Room entry
+ * @param {string} newRoom.number The physical number assigned of the room entry
+ * @param {string|number} newRoom.category The type of Room this entry belongs to. Available categories are: 'lecture-hall', 'lab', 'computer-lab', 'study-hall', 'office-space', 'library'
+ * @param {function} result A promise callback function to which the confirmation of success or failure is sent to
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
  */
 Room.create = async (newRoom, result) => {
   try {
     const query = sql.format("INSERT INTO room SET ?", newRoom);
     const res = await sql.execute(query);
     result(null, { id: res[0].insertId, ...newRoom });
-    console.log("New User got registered: ", { 
+    console.log("New User got registered: ", {
       id: res[0].insertId,
       roomName: newRoom.name,
       roomNumber: newRoom.number,
@@ -40,11 +52,18 @@ Room.create = async (newRoom, result) => {
   }
 }
 
-// Testing Done
+// Testing is done POYO
 /**
+ * # getById(room, result)
  * 
- * @param {number} room 
- * @param {*} result 
+ * @description Retrieves base Room information that matches the input ID
+ * 
+ * ### Params
+ * @param {number} room ID of the Room
+ * @param {function} result A promise callback function to which the confirmation of success or failure is sent to
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
  */
 Room.getById = async (room, result) => {
   try {
@@ -62,11 +81,19 @@ Room.getById = async (room, result) => {
   }
 }
 
+// Testing is done POYO
 /**
- * Testing is done POYO
- * @param {*} limit 
- * @param {*} offset 
- * @param {*} result 
+ * # Room.getAll(limit, offset, result)
+ * 
+ * @description Retrieves a list of Rooms from the database.
+ * 
+ * ### Parameters
+ * @param {number} limit The maximum number of rooms to retrieve.
+ * @param {number} offset The number of rooms to skip before starting to retrieve.
+ * @param {function} result A callback function that is called with the results of the query.
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
  */
 Room.getAll = async (limit, offset, result) => {
   try {
@@ -84,11 +111,18 @@ Room.getAll = async (limit, offset, result) => {
 }
 
 
-// Requires Testing
+// Testing done
 /**
+ * # Room.getByName(room, result)
  * 
- * @param {string} room 
- * @param {*} result 
+ * @description Retrieves base Room information that matches the input name
+ * 
+ * # Params
+ * @param {string} room Name of the Room
+ * @param {function} result A promise callback function to which the confirmation of success or failure is sent to
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
  */
 Room.getByName = async (room, result) => {
   const r = room.toLowerCase();
@@ -102,16 +136,26 @@ Room.getByName = async (room, result) => {
     }
   } catch (err) {
     console.log("error: ", boom.internal(err.message));
-    result({kind: "bad_input"}, null);
+    result({ kind: "bad_input" }, null);
   }
 }
 
+// Testing Done POYO
 /**
+ * # Room.getByCategory(limit, offset, category, result)
  * 
+ * @description Retrieves base Room information that matches the input category
+ * Available matching categories are: 
+ * `lecture-hall` `lab` `computer-lab` `study-hall` `office-space` and `library`
+ * 
+ * ### Params
  * @param {number} limit 
  * @param {number} offset 
  * @param {string} category 
- * @param {*} result 
+ * @param {function} result A promise callback function to which the confirmation of success or failure is sent to
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
  */
 Room.getByCategory = async (limit, offset, category, result) => {
   const c = category.toLowerCase();
@@ -131,12 +175,25 @@ Room.getByCategory = async (limit, offset, category, result) => {
 
 
 // Requires Testing
-Room.getAllUnavailableTimeSlots = async (roomId, result) => {
+/**
+ * # getAllUnavailableTimeSlots(roomId, limit, offset, result)
+ * 
+ * 
+ * ### Params
+ * @param {number} room 
+ * @param {number} limit 
+ * @param {number} offset 
+ * @param {function} result A promise callback function to which the confirmation of success or failure is sent to
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
+ */
+Room.getAllUnavailableTimeSlots = async (room, limit, offset, result) => {
   try {
-    const query = sql.format("SELECT id, creationDate, startTime, endTime FROM unavailableRoomPeriod where roomId in ?", roomId)
+    const query = sql.format("SELECT id, creationDate, startTime, endTime FROM unavailableRoomPeriod WHERE roomId = ? LIMIT ? OFFSET ?", [room, limit, offset])
     const res = await sql.query(query)
     if (res.length) {
-      result(null, res[0], ...roomId)
+      result(null, res[0])
     } else {
       result({ kind: "not_found" }, null);
     }
@@ -147,6 +204,14 @@ Room.getAllUnavailableTimeSlots = async (roomId, result) => {
 }
 
 // Requires testing
+/**
+ * ### Params
+ * @param {*} unavailableSlotid 
+ * @param {function} result A promise callback function to which the confirmation of success or failure is sent to
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
+ */
 Room.markRoomAvailable = async (unavailableSlotid, result) => {
   try {
     const query = sql.format("DELETE FROM unavailableRoomPeriod where id = ?", unavailableSlotid)
@@ -163,40 +228,78 @@ Room.markRoomAvailable = async (unavailableSlotid, result) => {
   }
 }
 
-
+/**
+ * 
+ * @param {number} roomId 
+ * @param {function} result A promise callback function to which the confirmation of success or failure is sent to
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
+ */
 Room.markRoomUnavailable = async (roomId, result) => {
   try {
-    
+
   } catch (error) {
     console.log("error: ", err);
     result(boom.internal(err.message), null);
   }
 }
 
-
-Room.removeRoom = async (roomId, result) => {
+/**
+ * 
+ * ### Params
+ * @param {number} room 
+ * @param {function} result A promise callback function to which the confirmation of success or failure is sent to
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
+ */
+Room.removeRoom = async (room, result) => {
   try {
-    
+
   } catch (error) {
     console.log("error: ", err);
     result(boom.internal(err.message), null);
   }
 }
 
-// Find who appointed a room at a certain time
+// 
+/**
+ * 
+ * Find who appointed a room at a certain time
+ * 
+ * ### Params
+ * @param {number} roomId 
+ * @param {*} date 
+ * @param {*} time 
+ * @param {function} result A promise callback function to which the confirmation of success or failure is sent to
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
+ */
 Room.findWhoGotAppointedToThisRoom = async (roomId, date, time, result) => {
   try {
-    
+
   } catch (error) {
     console.log("error: ", err);
     result(boom.internal(err.message), null);
   }
 }
 
-// Give an all-day schedule for a room
+
+/**
+ * @description Give an all-day schedule for a room
+ * 
+ * @param {number} roomId 
+ * @param {*} date 
+ * @param {function} result A promise callback function to which the confirmation of success or failure is sent to
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
+ */
 Room.getAllDaySchedule = async (roomId, date, result) => {
   try {
-    
+
   } catch (error) {
     console.log("error: ", err);
     result(boom.internal(err.message), null);
@@ -204,7 +307,18 @@ Room.getAllDaySchedule = async (roomId, date, result) => {
 }
 
 // Requires Testing
-Room.getMostUsedRoom = async (result, limit = undefined) => {
+/**
+ * # Room.getMostUsedRoom(limit, offset, result)
+ * 
+ * ### Params 
+ * @param {number} limit 
+ * @param {number} offset 
+ * @param {function} result A promise callback function to which the confirmation of success or failure is sent to
+ * 
+ * @returns {Promise<void>} Does not return anything. Instead, it calls a promise, being the result 
+ * function with the results of the query.
+ */
+Room.getMostUsedRoom = async (limit, offset, result) => {
   try {
     // requires some testing
     const query = sql.format("SELECT id from room natural inner join reservation where room.id = reservation.roomId")
@@ -219,9 +333,5 @@ Room.getMostUsedRoom = async (result, limit = undefined) => {
     result(boom.internal(err.message), null);
   }
 }
-
-
-
-
 
 module.exports = Room;
