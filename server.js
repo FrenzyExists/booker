@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const compression = require("compression")
+const compression = require("compression");
 
 const app = express();
 
@@ -25,6 +25,7 @@ app.get("/", (req, res) => {
 
 require("./app/routes/user.routes.js")(app);
 require("./app/routes/room.routes.js")(app);
+require("./app/routes/reservation.routes.js")(app);
 
 // set port, listen for requests
 const PORT = process.env.API_PORT || 8082;

@@ -26,4 +26,14 @@ exports.helperModelGetterSimple = async (sqlQuery, result, argsNames, ...args) =
   }
 }
 
-// exports.helperControllerGetterSimple = async (modelFun, )
+exports.helperModelSetterSimple = async (sqlQuery, result, queryObject, msg) => {
+  try {
+    const query = sql.format(sqlQuery, queryObject);
+    const res = await sql.execute(query);
+    result(null, { id: res[0].insertId, ...queryObject });
+    console.log(msg, queryObject);
+  } catch (err) {
+    console.log("error: ", err);
+    result(boom.internal(err.message), null);
+  }
+}

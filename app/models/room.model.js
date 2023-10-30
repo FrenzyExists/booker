@@ -1,6 +1,6 @@
 const sql = require("./db");
 const boom = require("@hapi/boom");
-const helper = require("./helper")
+const helper = require("./helper");
 
 /**
  * # Room

@@ -1,4 +1,4 @@
-CREATE TABLE if not exists user (
+CREATE TABLE IF NOT EXISTS user (
   id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   firstName varchar(50) NOT NULL,
   lastName varchar(50) NOT NULL,
@@ -7,13 +7,12 @@ CREATE TABLE if not exists user (
   UNIQUE KEY `email_UNIQUE` (`email`)
 );
 
-create table if not exists room (
+CREATE TABLE IF NOT EXISTS room (
   id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   roomName varchar(50) NOT NULL,
   roomNumber varchar(50) NOT NULL,
   capacity int,
   category ENUM('lecture-hall', 'lab', 'computer-lab', 'study-hall', 'office-space', 'library')
-
 );
 
 CREATE TABLE IF NOT EXISTS userRole (
@@ -25,13 +24,11 @@ CREATE TABLE IF NOT EXISTS userRole (
 
 CREATE TABLE IF NOT EXISTS reservation (
   id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-  reservationName varchar(50) default 'untitled reservation',
+  reservationName VARCHAR(50) DEFAULT 'untitled reservation',
   startReservationTime DATETIME NOT NULL,
   endReservationTime DATETIME NOT NULL,
   reservationCreationDate TIMESTAMP NOT NULL DEFAULT NOW(),
-  userId INT,
   roomId INT,
-  FOREIGN KEY (userId) REFERENCES user(id),
   FOREIGN KEY (roomId) REFERENCES room(id)
 );
 
@@ -56,15 +53,19 @@ CREATE TABLE IF NOT EXISTS unavailableRoomPeriod (
 CREATE TABLE IF NOT EXISTS invitation (
   id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
   creationDate TIMESTAMP NOT NULL DEFAULT NOW(),
-  userInvitee INT,
-  userInvited INT,
+  userInvitee INT NOT NULL,
+  userInvited INT NOT NULL,
+  reservationId INT NOT NULL,
   FOREIGN KEY (userInvitee) REFERENCES user(id),
-  FOREIGN KEY (userInvited) REFERENCES user(id)
+  FOREIGN KEY (userInvited) REFERENCES user(id),
+  FOREIGN KEY (reservationId) REFERENCES reservation(id)
 );
 
 CREATE TABLE IF NOT EXISTS notes (
   id integer PRIMARY KEY AUTO_INCREMENT,
   creationDate TIMESTAMP NOT NULL DEFAULT NOW(),
   title VARCHAR(255) NOT NULL,
-  contents TEXT NOT NULL
+  contents TEXT NOT NULL,
+  noteAuthor INT,
+  FOREIGN KEY (noteAuthor) REFERENCES user(id)
 );
